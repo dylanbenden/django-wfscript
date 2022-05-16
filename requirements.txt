@@ -1,0 +1,5 @@
+asgiref==3.5.1
+backports.zoneinfo==0.2.1
+Django==4.0.4
+python-wfscript @ git+https://github.com/dylanbenden/python-wfscript@017c89fcd8e5461767b23dfd05301e5702262420
+sqlparse==0.4.2
