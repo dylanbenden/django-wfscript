@@ -1,0 +1,1 @@
+CONTENT_ROOT = __name__
