@@ -10,7 +10,7 @@ SECRET_KEY = 'django-insecure-l==7+gumvxp4_60=3%7@@tdvi#%whf04n3-#o#g^e4)mxrs0ef
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_wfscript.wfscript_api',
+    'domains.it'
 ]
 
 MIDDLEWARE = [
@@ -83,6 +85,8 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
+
+# TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 
 STATIC_URL = 'static/'

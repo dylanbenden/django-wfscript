@@ -1,0 +1,33 @@
+- !META
+  namespace: it/provisioning
+  name: provision_user
+  version: 1.0
+  status: production
+
+
+- !INPUT
+  first_name:
+    data_type: string
+    required: true
+  last_name:
+    data_type: string
+    required: true
+  department:
+    data_type: string
+    required: true
+
+
+- !BODY
+  - !Action
+    id: it/provisioning::add_user_record==production
+    input:
+      first_name: !Input first_name
+      last_name: !Input last_name
+      department: !Input department
+    output>>: !Output user_name
+
+
+- !RETURN
+  first_name: !Input first_name
+  last_name: !Input last_name
+  user_name: !Output user_name
