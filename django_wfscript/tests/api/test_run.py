@@ -41,10 +41,6 @@ class RunApiTestCase(TestCase):
         
         # second (duplicate) call
         second_output = client.post(*api_args, **api_kwargs).json()
-        assert first_output[PayloadKey.DUPLICATE] is True
+        assert second_output[PayloadKey.DUPLICATE] is True
         # everything else besides "duplicate" is identical
         assert second_output == dict(first_output, **{PayloadKey.DUPLICATE: True})
-
-
-        import ipdb; ipdb.set_trace()
-        pass
