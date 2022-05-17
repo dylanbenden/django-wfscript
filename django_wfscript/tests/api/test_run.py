@@ -44,3 +44,57 @@ class RunApiTestCase(TestCase):
         assert second_output[PayloadKey.DUPLICATE] is True
         # everything else besides "duplicate" is identical
         assert second_output == dict(first_output, **{PayloadKey.DUPLICATE: True})
+
+
+    def test_run_api_multi_step(self):
+        client = Client()
+        method = 'hr/onboarding::onboard_user==1.0'
+        first_step_payload = {
+            PayloadKey.METHOD: method,
+            PayloadKey.INPUT: {
+                'first_name': 'Kathryn',
+                'last_name': 'Janeway',
+                'department': 'Operations',
+                'level': 'Captain'
+            }
+        }
+        api_args = '/api/run/', json.dumps(first_step_payload)
+        api_kwargs = {'content_type': 'application/json'}
+
+        # First step
+        first_step_output = client.post(*api_args, **api_kwargs).json()
+        run_id = first_step_output[PayloadKey.RUN_ID]
+        resume_info = first_step_output[PayloadKey.RESUME]
+        # first_state = resume_info.pop(PayloadKey.STATE)
+        assert first_step_output[PayloadKey.RESULT] == {'user_id': 'USR-123'}
+        assert is_uuid(run_id) is True
+        assert resume_info == {
+            PayloadKey.METHOD: 'hr/onboarding::onboard_user==1.0',
+            PayloadKey.STEP: 'create_user_record'
+        }
+
+        # Second step
+        second_step_payload = {
+            PayloadKey.METHOD: method,
+            PayloadKey.INPUT: {
+                'emergency_contacts': [
+                    {
+                        'name': 'Chakotay'
+                    },
+                    {
+                        'name': 'Tuvok'
+                    },
+                    {
+                        'name': 'Neelix'
+                    },
+                ]
+            },
+            PayloadKey.RUN_ID: run_id,
+            PayloadKey.RESUME: resume_info
+        }
+        api_args = '/api/run/', json.dumps(second_step_payload)
+        second_step_output = client.post(*api_args, **api_kwargs).json()
+        assert second_step_output[PayloadKey.RESULT] == {'user_id': 'USR-123', 'status': 'Onboarding complete'}
+        assert second_step_output[PayloadKey.RUN_ID] == run_id
+        assert second_step_output[PayloadKey.RESUME] == {}
+
