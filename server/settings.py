@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_wfscript.wfscript_api',
+    'domains.hr',
     'domains.it'
 ]
 

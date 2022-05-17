@@ -6,6 +6,8 @@ from django_wfscript.constants.models import FieldLength
 
 class Payload(models.Model):
     md5 = models.CharField(max_length=FieldLength.MD5, unique=True)
+    data = models.JSONField(encoder=DjangoJSONEncoder)
+    run = models.ForeignKey('Run', on_delete=models.PROTECT, related_name='payloads')
 
 
 class Response(models.Model):

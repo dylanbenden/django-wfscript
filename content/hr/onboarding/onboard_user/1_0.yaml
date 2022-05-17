@@ -1,0 +1,59 @@
+- !META
+  namespace: hr/onboarding
+  name: onboard_user
+  version: 1.0
+  status: production
+
+
+- !INPUT
+  first_name:
+    data_type: string
+    required: true
+  last_name:
+    data_type: string
+    required: true
+  department:
+    data_type: string
+    required: true
+  level:
+    data_type: string
+    required: true
+
+
+- !BODY
+  - !Step
+    name: create_user_record
+    body:
+      - !Action
+        id: hr/onboarding::add_staff_record==production
+        input:
+          first_name: !Input first_name
+          last_name: !Input last_name
+          department: !Input department
+        output>>: !State user_id
+    return:
+      user_id: !State user_id
+
+  - !Step
+    name: add_emergency_contacts
+    input:
+      emergency_contacts:
+        data_type: array
+        member_data_type: object
+        member_spec:
+          name:
+            data_type: string
+            required: false
+    body:
+      - !Action
+        id: hr/onboarding::add_emergency_contacts==production
+        input:
+          user_id: !State user_id
+          contacts: !Input emergency_contacts
+
+
+- !RETURN
+  user_id: !State user_id
+  status: Onboarding complete
+
+
