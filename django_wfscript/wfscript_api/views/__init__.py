@@ -1,4 +1,6 @@
 from django.apps import apps
 
-core_domain = apps.get_app_config('wfscript_api')
-core_domain.build_method_map()
+from django_wfscript.constants.domains import DomainKeyword
+
+core_domain = apps.get_app_config(DomainKeyword.CORE_DOMAIN)
+core_domain.setup()

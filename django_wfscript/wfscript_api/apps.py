@@ -1,10 +1,11 @@
-from django.apps import AppConfig, apps
+from django.apps import AppConfig
+
 from django_wfscript.domains import DomainConfig, CoreConfig
 
 
 class WfscriptCore(AppConfig, DomainConfig, CoreConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'django_wfscript.wfscript_api'
 
     def identify_namespaces(self):
-        return list()
+        from content.core import core_root_namespace
+        return [core_root_namespace]

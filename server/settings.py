@@ -1,6 +1,8 @@
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from django_wfscript.constants.domains import DomainKeyword
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -22,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_wfscript.wfscript_api',
+    f'django_wfscript.{DomainKeyword.CORE_DOMAIN}',
     'domains.hr',
     'domains.it'
 ]

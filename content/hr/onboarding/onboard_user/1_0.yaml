@@ -22,17 +22,19 @@
 
 - !BODY
   - !Step
-    name: create_user_record
+    name: create_staff_record
     body:
       - !Action
-        id: hr/onboarding::add_staff_record==production
+        id: core/materials::add_material==production
         input:
+          model_identity: hr/staff
           first_name: !Input first_name
           last_name: !Input last_name
-          department: !Input department
-        output>>: !State user_id
+        # function returns a user object (django model instance)
+        output>>: !State new_staff
     return:
-      user_id: !State user_id
+      # including a object or material in a return block will return its identity (a material's serialized form)
+      new_staff: !State new_staff
 
   - !Step
     name: add_emergency_contacts
@@ -41,19 +43,23 @@
         data_type: array
         member_data_type: object
         member_spec:
-          name:
+          contact_name:
+            data_type: string
+            required: false
+          contact_info:
             data_type: string
             required: false
     body:
       - !Action
         id: hr/onboarding::add_emergency_contacts==production
         input:
-          user_id: !State user_id
+          staff: !Material new_staff
           contacts: !Input emergency_contacts
 
 
 - !RETURN
-  user_id: !State user_id
+  # including an object/material in a return block returns its identity
+  new_staff: !State new_staff
   status: Onboarding complete
 
 
