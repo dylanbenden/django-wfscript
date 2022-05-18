@@ -4,6 +4,7 @@ from datetime import datetime
 from django.test import TestCase, Client
 from wfscript.constants.payload import PayloadKey
 
+from domains.hr.models import Staff, EmergencyContact
 from ...utils.payload import is_uuid
 from ...wfscript_api.models import Payload, Response
 
@@ -61,17 +62,25 @@ class RunApiTestCase(TestCase):
         api_args = '/api/run/', json.dumps(first_step_payload)
         api_kwargs = {'content_type': 'application/json'}
 
+        # Initial conditions: no staff, no emergency contacts
+        assert Staff.objects.all().count() == 0
+        assert EmergencyContact.objects.all().count() == 0
+
         # First step
+        expected_staff_identity = 'hr/staff::1'
         first_step_output = client.post(*api_args, **api_kwargs).json()
+        assert Staff.objects.all().count() == 1
+        new_staff = Staff.objects.all().first()
+        assert new_staff.identity == expected_staff_identity
         run_id = first_step_output[PayloadKey.RUN_ID]
         resume_info = first_step_output[PayloadKey.RESUME]
-        # first_state = resume_info.pop(PayloadKey.STATE)
-        assert first_step_output[PayloadKey.RESULT] == {'user_id': 'USR-123'}
+        assert first_step_output[PayloadKey.RESULT] == {'new_staff': expected_staff_identity}
         assert is_uuid(run_id) is True
         assert resume_info == {
             PayloadKey.METHOD: 'hr/onboarding::onboard_user==1.0',
-            PayloadKey.STEP: 'create_user_record'
+            PayloadKey.STEP: 'create_staff_record'
         }
+        assert EmergencyContact.objects.all().count() == 0
 
         # Second step
         second_step_payload = {
@@ -79,13 +88,12 @@ class RunApiTestCase(TestCase):
             PayloadKey.INPUT: {
                 'emergency_contacts': [
                     {
-                        'name': 'Chakotay'
+                        'contact_name': 'Chakotay',
+                        'contact_info': 'chakotay@alumns.maquis.org'
                     },
                     {
-                        'name': 'Tuvok'
-                    },
-                    {
-                        'name': 'Neelix'
+                        'contact_name': 'Tuvok',
+                        'contact_info': 'tuvok@security.voyager.ufop'
                     },
                 ]
             },
@@ -94,7 +102,10 @@ class RunApiTestCase(TestCase):
         }
         api_args = '/api/run/', json.dumps(second_step_payload)
         second_step_output = client.post(*api_args, **api_kwargs).json()
-        assert second_step_output[PayloadKey.RESULT] == {'user_id': 'USR-123', 'status': 'Onboarding complete'}
+        assert second_step_output[PayloadKey.RESULT] == {'new_staff': expected_staff_identity,
+                                                         'status': 'Onboarding complete'}
         assert second_step_output[PayloadKey.RUN_ID] == run_id
         assert second_step_output[PayloadKey.RESUME] == {}
+        assert Staff.objects.all().count() == 1
+        assert EmergencyContact.objects.all().count() == 2
 

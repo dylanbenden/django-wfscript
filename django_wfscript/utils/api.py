@@ -1,6 +1,7 @@
 import json
 
 from wfscript.constants.payload import PayloadKey
+from wfscript.utils.json import preserialize
 
 from django_wfscript.utils.payload import hash_request_body
 from django_wfscript.wfscript_api.models import Payload, Response, Run
@@ -58,9 +59,10 @@ def api_run_method(request_body):
             run = Run.objects.create(method=method_identity)
         payload = Payload.objects.create(md5=payload_hash, run=run, data=payload_data)
         method_executor = core_domain.get_method_executor(method_identity)
-        response_data = method_executor.run(input_data=payload_data[PayloadKey.INPUT],
-                                            state=run.state,
-                                            resume_info=payload_data.get(PayloadKey.RESUME, {}))
+        response_data = preserialize(
+            method_executor.run(input_data=payload_data[PayloadKey.INPUT],
+                                state=run.state,
+                                resume_info=payload_data.get(PayloadKey.RESUME, {})))
         response_data[PayloadKey.RUN_ID] = run.identity
         handle_resume_state(run, response_data)
         Response.objects.create(payload=payload, data=response_data)
